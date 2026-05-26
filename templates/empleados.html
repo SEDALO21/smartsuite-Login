@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}Empleados{% endblock %}
+{% block page_heading %}Empleados{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-end mb-3">
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevo">
+    <i class="bi bi-person-plus"></i> Nuevo Empleado
+  </button>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr><th>#</th><th>Nombre</th><th>Cargo</th><th>Área</th><th>Correo</th><th>Teléfono</th></tr>
+      </thead>
+      <tbody>
+        {% for emp in empleados %}
+        <tr>
+          <td>{{ emp.id_empleado }}</td>
+          <td><strong>{{ emp.nombre }}</strong></td>
+          <td>{{ emp.cargo }}</td>
+          <td>{{ emp.area or '—' }}</td>
+          <td><a href="mailto:{{ emp.correo }}">{{ emp.correo }}</a></td>
+          <td>{{ emp.telefono or '—' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="text-center text-muted py-3">Sin empleados registrados</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Nuevo -->
+<div class="modal fade" id="modalNuevo" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" action="/empleados/nuevo">
+        <div class="modal-header"><h5 class="modal-title">Registrar empleado</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Nombre completo</label>
+            <input type="text" name="nombre" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Cargo</label>
+            <input type="text" name="cargo" class="form-control" required placeholder="Ej: Analista TI">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Área</label>
+            <input type="text" name="area" class="form-control" placeholder="Ej: Tecnología">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Correo corporativo</label>
+            <input type="email" name="correo" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Teléfono</label>
+            <input type="text" name="telefono" class="form-control">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

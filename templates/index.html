@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block page_heading %}Dashboard{% endblock %}
+{% block content %}
+
+<div class="row g-3 mb-4">
+  <div class="col-md-2">
+    <div class="card stat-card green p-3">
+      <div class="text-muted small">Disponibles</div>
+      <div class="fs-2 fw-bold text-success">{{ stats.disponibles }}</div>
+      <div class="text-muted small"><i class="bi bi-check-circle"></i> Equipos libres</div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="card stat-card blue p-3">
+      <div class="text-muted small">Prestados</div>
+      <div class="fs-2 fw-bold" style="color:#1a237e">{{ stats.prestados }}</div>
+      <div class="text-muted small"><i class="bi bi-box-arrow-right"></i> En uso</div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="card stat-card orange p-3">
+      <div class="text-muted small">Mantenimiento</div>
+      <div class="fs-2 fw-bold text-warning">{{ stats.mantenimiento }}</div>
+      <div class="text-muted small"><i class="bi bi-tools"></i> En reparación</div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="card stat-card yellow p-3">
+      <div class="text-muted small">Pendientes</div>
+      <div class="fs-2 fw-bold" style="color:#f9a825">{{ stats.solicitudes_pendientes }}</div>
+      <div class="text-muted small"><i class="bi bi-hourglass-split"></i> Por aprobar</div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="card stat-card blue p-3">
+      <div class="text-muted small">Activos</div>
+      <div class="fs-2 fw-bold text-primary">{{ stats.prestamos_activos }}</div>
+      <div class="text-muted small"><i class="bi bi-clock"></i> Préstamos activos</div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="card stat-card red p-3">
+      <div class="text-muted small">Vencidos</div>
+      <div class="fs-2 fw-bold text-danger">{{ stats.vencidos }}</div>
+      <div class="text-muted small"><i class="bi bi-exclamation-triangle"></i> Fecha superada</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header bg-white fw-bold">
+    <i class="bi bi-clock-history"></i> Últimas solicitudes
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>#</th><th>Empleado</th><th>Equipo</th><th>Fecha</th><th>Estado</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in ultimas %}
+        <tr>
+          <td>{{ s.id_solicitud }}</td>
+          <td>{{ s.empleado }}</td>
+          <td>{{ s.equipo }}</td>
+          <td>{{ s.fecha_solicitud[:10] }}</td>
+          <td><span class="badge badge-{{ s.estado_solicitud }} px-2 py-1 rounded-pill">{{ s.estado_solicitud }}</span></td>
+          <td><a href="/solicitudes" class="btn btn-sm btn-outline-secondary">Ver</a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="text-center text-muted py-3">Sin solicitudes aún</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

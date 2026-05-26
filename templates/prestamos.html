@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}Préstamos{% endblock %}
+{% block page_heading %}Préstamos{% endblock %}
+{% block content %}
+
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>#</th><th>Empleado</th><th>Equipo</th>
+          <th>Fecha Entrega</th><th>Dev. Estimada</th><th>Dev. Real</th>
+          <th>Estado</th><th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in prestamos %}
+        {% set vencido = p.estado_prestamo == 'activo' and p.fecha_estimada_dev < hoy %}
+        <tr class="{{ 'table-danger' if vencido else '' }}">
+          <td>{{ p.id_prestamo }}</td>
+          <td>{{ p.empleado_nombre }}</td>
+          <td>{{ p.equipo_nombre }}</td>
+          <td>{{ p.fecha_entrega[:10] }}</td>
+          <td>
+            {{ p.fecha_estimada_dev }}
+            {% if vencido %}<span class="badge bg-danger ms-1">VENCIDO</span>{% endif %}
+          </td>
+          <td>{{ p.fecha_devolucion_real[:10] if p.fecha_devolucion_real else '—' }}</td>
+          <td>
+            <span class="badge badge-{{ p.estado_prestamo }} px-2 py-1 rounded-pill">
+              {{ p.estado_prestamo }}
+            </span>
+          </td>
+          <td>
+            {% if p.estado_prestamo == 'activo' and not p.devuelto %}
+            <button class="btn btn-sm btn-warning"
+              data-bs-toggle="modal" data-bs-target="#modalDevolver"
+              data-id="{{ p.id_prestamo }}"
+              data-equipo="{{ p.equipo_nombre }}">
+              <i class="bi bi-box-arrow-in-left"></i> Devolver
+            </button>
+            {% else %}
+            <span class="text-muted small">Cerrado</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="text-center text-muted py-3">Sin préstamos registrados</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Devolución -->
+<div class="modal fade" id="modalDevolver" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" id="formDevolver">
+        <div class="modal-header">
+          <h5 class="modal-title">Registrar devolución</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-3">Equipo: <strong id="equipoNombre"></strong></p>
+          <div class="mb-3">
+            <label class="form-label">Estado del equipo al devolver</label>
+            <select name="estado_equipo" class="form-select" required>
+              <option value="buen_estado">✅ Buen estado</option>
+              <option value="con_danos">⚠️ Con daños (pasa a mantenimiento)</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Observaciones</label>
+            <textarea name="observaciones" class="form-control" rows="2"
+                      placeholder="Detalles del estado físico..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Confirmar devolución</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('modalDevolver').addEventListener('show.bs.modal', function(e) {
+  const btn = e.relatedTarget;
+  document.getElementById('equipoNombre').textContent = btn.dataset.equipo;
+  document.getElementById('formDevolver').action = '/prestamos/devolver/' + btn.dataset.id;
+});
+</script>
+{% endblock %}

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SmartSuite – {% block title %}{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body { background: #f0f2f5; }
+    .sidebar {
+      min-height: 100vh;
+      background: linear-gradient(180deg, #0f1b4c 0%, #1a237e 100%);
+      color: white;
+      width: 240px;
+      position: fixed;
+      top: 0; left: 0;
+    }
+    .sidebar .brand { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,.2); }
+    .sidebar .nav-link { color: rgba(255,255,255,.8); padding: 10px 20px; border-radius: 0; transition: all .2s; }
+    .sidebar .nav-link:hover, .sidebar .nav-link.active { background: rgba(255,255,255,.15); color: #fff; padding-left: 28px; }
+    .sidebar .nav-link i { margin-right: 8px; }
+    .sidebar .nav-divider { border-top: 1px solid rgba(255,255,255,.1); margin: 8px 20px; }
+    .sidebar .user-info { padding: 12px 20px; font-size: 12px; color: rgba(255,255,255,.5); }
+    .sidebar .user-info strong { color: rgba(255,255,255,.85); display: block; font-size: 13px; }
+    .role-badge-admin   { background: rgba(229,57,53,.3); color: #ff8a80; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+    .role-badge-worker  { background: rgba(0,176,255,.2); color: #80d8ff; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+    .main-content { margin-left: 240px; padding: 30px; }
+    .topbar { background: white; padding: 15px 30px; margin: -30px -30px 30px -30px; box-shadow: 0 2px 4px rgba(0,0,0,.08); }
+    .card { border: none; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,.07); }
+    .stat-card { border-left: 4px solid; }
+    .stat-card.blue   { border-color: #1a237e; }
+    .stat-card.green  { border-color: #2e7d32; }
+    .stat-card.orange { border-color: #e65100; }
+    .stat-card.red    { border-color: #c62828; }
+    .stat-card.yellow { border-color: #f9a825; }
+    .badge-pendiente  { background: #fff3e0; color: #e65100; }
+    .badge-aprobada   { background: #e8f5e9; color: #2e7d32; }
+    .badge-rechazada  { background: #fce4ec; color: #c62828; }
+    .badge-activo     { background: #e3f2fd; color: #1565c0; }
+    .badge-cerrado    { background: #e8f5e9; color: #2e7d32; }
+    .badge-vencido    { background: #fce4ec; color: #c62828; }
+    .badge-disponible    { background: #e8f5e9; color: #2e7d32; }
+    .badge-prestado      { background: #e3f2fd; color: #1565c0; }
+    .badge-en_mantenimiento { background: #fff3e0; color: #e65100; }
+    .table th { background: #f8f9fa; font-weight: 600; font-size: .85rem; text-transform: uppercase; letter-spacing: .5px; }
+    .btn-primary { background: #1a237e; border-color: #1a237e; }
+    .btn-primary:hover { background: #283593; border-color: #283593; }
+    /* Ocultar acciones de admin para trabajadores */
+    .admin-only { display: none; }
+  </style>
+</head>
+<body>
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="brand"><svg viewBox="0 0 200 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="26" fill="#ffffff" opacity="0.15"/><circle cx="32" cy="32" r="22" fill="#ffffff" opacity="0.1"/><path d="M23 24 Q23 18 28 18 L38 18 Q44 18 44 24 L44 27 Q44 33 38 33 L26 33 Q20 33 20 39 L20 40 Q20 46 26 46 L38 46 Q44 46 44 40" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/><text x="64" y="28" font-family="Arial,sans-serif" font-size="15" font-weight="700" fill="white">SmartSuite</text><text x="64" y="44" font-family="Arial,sans-serif" font-size="9" fill="rgba(255,255,255,0.7)">Gestión de Préstamos</text></svg></div>
+  <nav class="nav flex-column mt-3">
+    <a href="/" class="nav-link {% if request.path=='/' %}active{% endif %}">
+      <i class="bi bi-speedometer2"></i> Dashboard
+    </a>
+    <a href="/equipos" class="nav-link {% if '/equipos' in request.path %}active{% endif %}">
+      <i class="bi bi-phone"></i> Equipos
+    </a>
+    <a href="/empleados" class="nav-link {% if '/empleados' in request.path %}active{% endif %}">
+      <i class="bi bi-people"></i> Empleados
+    </a>
+    <a href="/solicitudes" class="nav-link {% if '/solicitudes' in request.path %}active{% endif %}">
+      <i class="bi bi-clipboard-plus"></i> Solicitudes
+    </a>
+    <a href="/prestamos" class="nav-link {% if '/prestamos' in request.path %}active{% endif %}">
+      <i class="bi bi-box-arrow-right"></i> Préstamos
+    </a>
+    <a href="/mantenimiento" class="nav-link {% if '/mantenimiento' in request.path %}active{% endif %}">
+      <i class="bi bi-tools"></i> Mantenimiento
+    </a>
+    {% if current_user.rol == 'admin' %}
+    <div class="nav-divider"></div>
+    <a href="/usuarios" class="nav-link {% if '/usuarios' in request.path %}active{% endif %}">
+      <i class="bi bi-person-gear"></i> Usuarios
+    </a>
+    {% endif %}
+  </nav>
+
+  <div style="position:absolute; bottom:0; left:0; right:0; border-top:1px solid rgba(255,255,255,.1);">
+    <div class="user-info">
+      <strong>{{ current_user.nombre }}</strong>
+      {{ current_user.correo }}
+      <div class="mt-1">
+        {% if current_user.rol == 'admin' %}
+          <span class="role-badge-admin">ADMIN</span>
+        {% else %}
+          <span class="role-badge-worker">TRABAJADOR</span>
+        {% endif %}
+      </div>
+    </div>
+    <a href="/logout" class="nav-link" style="font-size:13px; padding:10px 20px;">
+      <i class="bi bi-box-arrow-left"></i> Cerrar sesión
+    </a>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main-content">
+  <div class="topbar d-flex align-items-center justify-content-between">
+    <h5 class="mb-0 fw-bold text-dark">{% block page_heading %}{% endblock %}</h5>
+    <div class="d-flex align-items-center gap-3">
+      <span class="text-muted small"><i class="bi bi-calendar3"></i> {{ now }}</span>
+    </div>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="alert alert-{{ cat }} alert-dismissible fade show" role="alert">
+        {{ msg }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

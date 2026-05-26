@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block title %}Solicitudes de Préstamo{% endblock %}
+{% block page_heading %}Solicitudes de Préstamo{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-end mb-3">
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevo">
+    <i class="bi bi-clipboard-plus"></i> Nueva Solicitud
+  </button>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>#</th><th>Empleado</th><th>Equipo</th><th>Supervisor</th>
+          <th>Fecha Solicitud</th><th>Dev. Estimada</th><th>Motivo</th><th>Estado</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in solicitudes %}
+        <tr>
+          <td>{{ s.id_solicitud }}</td>
+          <td>{{ s.empleado_nombre }}</td>
+          <td>{{ s.equipo_nombre }}</td>
+          <td>{{ s.supervisor_nombre or '—' }}</td>
+          <td>{{ s.fecha_solicitud[:10] }}</td>
+          <td>{{ s.fecha_estimada_dev }}</td>
+          <td><small class="text-muted">{{ s.motivo or '—' }}</small></td>
+          <td>
+            <span class="badge badge-{{ s.estado_solicitud }} px-2 py-1 rounded-pill">
+              {{ s.estado_solicitud }}
+            </span>
+          </td>
+          <td>
+            {% if s.estado_solicitud == 'pendiente' %}
+            <a href="/solicitudes/aprobar/{{ s.id_solicitud }}"
+               class="btn btn-sm btn-success me-1"
+               onclick="return confirm('¿Aprobar esta solicitud?')">
+              <i class="bi bi-check-lg"></i>
+            </a>
+            <a href="/solicitudes/rechazar/{{ s.id_solicitud }}"
+               class="btn btn-sm btn-danger"
+               onclick="return confirm('¿Rechazar esta solicitud?')">
+              <i class="bi bi-x-lg"></i>
+            </a>
+            {% else %}
+            <span class="text-muted small">—</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="9" class="text-center text-muted py-3">Sin solicitudes</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Nueva Solicitud -->
+<div class="modal fade" id="modalNuevo" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" action="/solicitudes/nueva">
+        <div class="modal-header"><h5 class="modal-title">Nueva solicitud de préstamo</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Empleado solicitante</label>
+            <select name="id_empleado" class="form-select" required>
+              <option value="">— Seleccionar —</option>
+              {% for emp in empleados %}
+              <option value="{{ emp.id_empleado }}">{{ emp.nombre }} ({{ emp.area }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Equipo disponible</label>
+            <select name="id_equipo" class="form-select" required>
+              <option value="">— Seleccionar —</option>
+              {% for eq in equipos %}
+              <option value="{{ eq.id_equipo }}">{{ eq.nombre }} – {{ eq.marca }} ({{ eq.numero_serie }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Supervisor (opcional)</label>
+            <select name="id_supervisor" class="form-select">
+              <option value="">— Sin asignar —</option>
+              {% for emp in empleados %}
+              <option value="{{ emp.id_empleado }}">{{ emp.nombre }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Fecha estimada de devolución</label>
+            <input type="date" name="fecha_estimada_dev" class="form-control" required
+                   min="{{ now[:10] }}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Motivo</label>
+            <textarea name="motivo" class="form-control" rows="2" placeholder="Ej: Visita a cliente..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Registrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

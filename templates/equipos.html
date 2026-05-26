@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% block title %}Equipos{% endblock %}
+{% block page_heading %}Equipos{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-end mb-3">
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevo">
+    <i class="bi bi-plus-lg"></i> Nuevo Equipo
+  </button>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>#</th><th>Nombre / Modelo</th><th>Tipo</th><th>Marca</th><th>Serie</th><th>Estado</th><th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for eq in equipos %}
+        <tr>
+          <td>{{ eq.id_equipo }}</td>
+          <td><strong>{{ eq.nombre }}</strong></td>
+          <td><span class="badge bg-secondary">{{ eq.tipo_nombre }}</span></td>
+          <td>{{ eq.marca or '—' }}</td>
+          <td><code>{{ eq.numero_serie }}</code></td>
+          <td>
+            <span class="badge badge-{{ eq.estado }} px-2 py-1 rounded-pill">
+              {{ eq.estado.replace('_',' ') }}
+            </span>
+          </td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary"
+              data-bs-toggle="modal" data-bs-target="#modalEditar"
+              data-id="{{ eq.id_equipo }}"
+              data-nombre="{{ eq.nombre }}"
+              data-marca="{{ eq.marca }}"
+              data-estado="{{ eq.estado }}">
+              <i class="bi bi-pencil"></i>
+            </button>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="text-center text-muted py-3">Sin equipos registrados</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Nuevo -->
+<div class="modal fade" id="modalNuevo" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" action="/equipos/nuevo">
+        <div class="modal-header"><h5 class="modal-title">Registrar equipo</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Tipo</label>
+            <select name="id_tipo" class="form-select" required>
+              {% for t in tipos %}<option value="{{ t.id_tipo }}">{{ t.nombre }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Nombre / Modelo</label>
+            <input type="text" name="nombre" class="form-control" required placeholder="Ej: Galaxy A52">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Marca</label>
+            <input type="text" name="marca" class="form-control" placeholder="Ej: Samsung">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Número de Serie</label>
+            <input type="text" name="numero_serie" class="form-control" required placeholder="Ej: SS-001">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Editar -->
+<div class="modal fade" id="modalEditar" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" id="formEditar">
+        <div class="modal-header"><h5 class="modal-title">Editar equipo</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Nombre / Modelo</label>
+            <input type="text" name="nombre" id="editNombre" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Marca</label>
+            <input type="text" name="marca" id="editMarca" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Estado</label>
+            <select name="estado" id="editEstado" class="form-select">
+              <option value="disponible">Disponible</option>
+              <option value="prestado">Prestado</option>
+              <option value="en_mantenimiento">En mantenimiento</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('modalEditar').addEventListener('show.bs.modal', function(e) {
+  const btn = e.relatedTarget;
+  document.getElementById('editNombre').value = btn.dataset.nombre;
+  document.getElementById('editMarca').value  = btn.dataset.marca;
+  document.getElementById('editEstado').value  = btn.dataset.estado;
+  document.getElementById('formEditar').action = '/equipos/editar/' + btn.dataset.id;
+});
+</script>
+{% endblock %}

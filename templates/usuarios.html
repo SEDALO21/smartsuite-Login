@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}Usuarios{% endblock %}
+{% block page_heading %}<i class="bi bi-person-gear me-2"></i>Gestión de Usuarios{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+  <div class="col">
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevo">
+      <i class="bi bi-person-plus me-1"></i> Nuevo Usuario
+    </button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>#</th><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in usuarios %}
+        <tr>
+          <td class="text-muted small">{{ u.id_usuario }}</td>
+          <td><strong>{{ u.nombre }}</strong></td>
+          <td class="small">{{ u.correo }}</td>
+          <td>
+            {% if u.rol == 'admin' %}
+              <span class="badge" style="background:#fce4ec;color:#c62828;">ADMIN</span>
+            {% else %}
+              <span class="badge" style="background:#e3f2fd;color:#1565c0;">TRABAJADOR</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if u.activo %}
+              <span class="badge badge-aprobada">Activo</span>
+            {% else %}
+              <span class="badge badge-rechazada">Inactivo</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="/usuarios/toggle/{{ u.id_usuario }}" class="btn btn-sm btn-outline-secondary"
+               onclick="return confirm('¿Cambiar estado del usuario?')">
+              <i class="bi bi-toggle-on"></i> Toggle
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal nuevo usuario -->
+<div class="modal fade" id="modalNuevo" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Nuevo Usuario</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="/usuarios/nuevo">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nombre completo</label>
+            <input type="text" name="nombre" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Correo <small class="text-muted">(@smartsuit.com.co)</small></label>
+            <input type="email" name="correo" class="form-control" placeholder="usuario@smartsuit.com.co" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Contraseña</label>
+            <input type="password" name="password" class="form-control" minlength="8" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Rol</label>
+            <select name="rol" class="form-select" required>
+              <option value="trabajador">Trabajador</option>
+              <option value="admin">Administrador</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Crear Usuario</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

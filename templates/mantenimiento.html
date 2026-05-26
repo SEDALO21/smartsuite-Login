@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block title %}Mantenimiento{% endblock %}
+{% block page_heading %}Mantenimiento{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <p class="mb-0 text-muted">Equipos actualmente en mantenimiento: <strong>{{ equipos_mant|length }}</strong></p>
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevo">
+    <i class="bi bi-tools"></i> Enviar a mantenimiento
+  </button>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>#</th><th>Equipo</th><th>Técnico</th>
+          <th>Fecha Entrada</th><th>Fecha Salida</th>
+          <th>Descripción de falla</th><th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in registros %}
+        <tr>
+          <td>{{ r.id_mantenimiento }}</td>
+          <td><strong>{{ r.equipo_nombre }}</strong></td>
+          <td>{{ r.tecnico or '—' }}</td>
+          <td>{{ r.fecha_entrada[:10] }}</td>
+          <td>
+            {% if r.fecha_salida %}
+              {{ r.fecha_salida[:10] }}
+              <span class="badge bg-success ms-1">Finalizado</span>
+            {% else %}
+              <span class="badge bg-warning text-dark">En curso</span>
+            {% endif %}
+          </td>
+          <td><small class="text-muted">{{ r.descripcion_falla or '—' }}</small></td>
+          <td>
+            {% if not r.fecha_salida %}
+            <a href="/mantenimiento/cerrar/{{ r.id_mantenimiento }}"
+               class="btn btn-sm btn-success"
+               onclick="return confirm('¿Marcar equipo como disponible?')">
+              <i class="bi bi-check-circle"></i> Dar de alta
+            </a>
+            {% else %}
+            <span class="text-muted small">—</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="text-center text-muted py-3">Sin registros de mantenimiento</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Nuevo -->
+<div class="modal fade" id="modalNuevo" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" action="/mantenimiento/nuevo">
+        <div class="modal-header"><h5 class="modal-title">Enviar equipo a mantenimiento</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          {% if equipos_mant %}
+          <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle"></i>
+            Solo se muestran equipos ya en estado "en mantenimiento" o puedes ingresar cualquier equipo por ID.
+          </div>
+          {% endif %}
+          <div class="mb-3">
+            <label class="form-label">Equipo en mantenimiento</label>
+            <select name="id_equipo" class="form-select" required>
+              <option value="">— Seleccionar —</option>
+              {% for eq in equipos_mant %}
+              <option value="{{ eq.id_equipo }}">{{ eq.nombre }} ({{ eq.numero_serie }})</option>
+              {% endfor %}
+            </select>
+            <div class="form-text">Solo se listan equipos marcados como "en mantenimiento". Para marcar un equipo, edítalo desde la sección Equipos.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Descripción de la falla</label>
+            <textarea name="descripcion" class="form-control" rows="3"
+                      placeholder="Describe el problema técnico..."></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Técnico responsable</label>
+            <input type="text" name="tecnico" class="form-control" placeholder="Nombre del técnico">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Registrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
